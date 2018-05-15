@@ -13,11 +13,11 @@ function loadMemory() {
     
   let datafile = process.argv[2];
   let data = fs.readFileSync(datafile, 'utf8');
-  data = data.match(/[^\r\n]+/g).filter(line => line[0].match(/\d+/)).map(line => line.slice(0, 8));
-  console.log(data);  
+  const program = data.match(/[^\r\n]+/g).filter(line => line[0].match(/\d+/)).map(line => line.slice(0, 8));
+
   // Hardcoded program to print the number 8 on the console
 
-    const program = [ // print8.ls8
+    const test = [ // print8.ls8
         "10011001", // LDI R0,8  Store 8 into R0
         "00000000",
         "00001000",
@@ -27,7 +27,8 @@ function loadMemory() {
     ];
 
     // Load the program into the CPU's memory a byte at a time
-    for (let i = 0; i < program.length; i++) {
+
+  for (let i = 0; i < program.length; i++) {
         cpu.poke(i, parseInt(program[i], 2));
     }
 }

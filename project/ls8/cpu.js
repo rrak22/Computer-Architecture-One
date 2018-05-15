@@ -44,15 +44,6 @@ class CPU {
     stopClock() {
         clearInterval(this.clock);
     }
-    
-    hlt() {
-      this.stopClock();
-      return;
-    }
-
-    ldi(register, integer) {
-      this.reg[parseInt(register, 10)] = integer;
-    }
 
     /**
      * ALU functionality
@@ -65,27 +56,27 @@ class CPU {
      * op can be: ADD SUB MUL DIV INC DEC CMP
      */
     alu(op, regA, regB) {
-      num1 = parseInt(this.ram.read(regA), 10);
-      num2 = parseInt(this.ram.read(regB), 10);
+      let num1 = this.reg[regA];
+      let num2 = this.reg[regB];
 
         switch (op) {
             case 'ADD':
-              poke(regA, parseInt(num1 + num2, 2));
+              this.reg[regA] = num1 + num2;
               break;
             case 'SUB':
-              poke(regA, parseInt(num1 - num2, 2));
+              this.reg[regA] = num1 - num2;
               break;
             case 'MUL':
-              poke(regA, parseInt(num1 * num2, 2));
+              this.reg[regA] = num1 * num2;
               break;
             case 'DIV':
-              poke(regA, parseInt(num1 / num2, 2));
+              this.reg[regA] = num1 / num2;
               break;
             case 'INC':
-              poke(regA, parseInt(num1++, 2));
+              this.reg[regA] = num1++;
               break;
             case 'DEC':
-              poke(regA, parseInt(num1--, 2));
+              this.reg[regA] = num1--;
               break;
             case 'CMP':
               num1 > num2 ? this.flag = parseInt(2, 2)
@@ -104,29 +95,29 @@ class CPU {
         
         const ADD = '10101000';
         const AND = '10110011';
-        const CALL = '01001000';
+        const CALL = '01001000'; //
         const CMP = '10100000';
-        const DEC = '01111001';
+        const DEC = '01111001'; //
         const HLT = '00000001';
-        const INC = '01111000';
-        const INT = '01001010';
-        const IRET = '00001011';
-        const JEQ = '01010001';
-        const JGT = '01010100';
-        const JLT = '01010011';
-        const JMP = '01010000';
-        const JNE = '01010010';
+        const INC = '01111000'; //
+        const INT = '01001010'; //
+        const IRET = '00001011'; //
+        const JEQ = '01010001'; //
+        const JGT = '01010100'; //
+        const JLT = '01010011'; //
+        const JMP = '01010000'; //
+        const JNE = '01010010'; //
         const LD = '10011000';
         const LDI = '10011001';
         const MOD = '10101100';
         const MUL = '10101010';
         const NOP = '00000000';
-        const NOT = '01110000';
+        const NOT = '01110000'; //
         const OR = '10110001';
-        const POP = '01001100';
-        const PRA = '01000010';
-        const PRN = '01000011';
-        const PUSH = '01001101';
+        const POP = '01001100'; //
+        const PRA = '01000010'; //
+        const PRN = '1000011'; //
+        const PUSH = '01001101'; //
         const RET = '00001001';
         const ST = '10011010';
         const SUB = '10101001';
@@ -150,25 +141,24 @@ class CPU {
 
         // Execute the instruction. Perform the actions for the instruction as
         // outlined in the LS-8 spec.
-        
-        switch (IR) {
+        switch (IR.toString(2)) {
           case LDI:
-            this.ldi(operandA, operandB);
+            this.reg[operandA] = operandB;
             break;
           case PRN:
-            this.prn(operandA);
+            console.log(this.reg[operandA]);
             break;
           case HLT:
-            this.hlt();
+            this.stopClock();
             break;
           case ADD:
-            this.alu("ADD", operandA, operandB);
+            this.alu("ADD", this.reg[operandA], this.reg[operandB]);
             break;
           case MUL:
             this.alu("MUL", operandA, operandB);
             break;
           default:
-            this.hlt();
+            this.stopClock();
         }
 
         // Increment the PC register to go to the next instruction. Instructions
