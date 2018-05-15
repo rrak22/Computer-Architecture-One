@@ -17,6 +17,9 @@ class CPU {
         
         // Special-purpose registers
         this.PC = 0; // Program Counter
+        this.MAR = 0;
+        this.MDR = 0;
+        this.FL = 0;
     }
     
     /**
@@ -41,6 +44,15 @@ class CPU {
     stopClock() {
         clearInterval(this.clock);
     }
+    
+    hlt() {
+      this.stopClock();
+      return;
+    }
+
+    ldi(register, integer) {
+      this.reg[parseInt(register, 10)] = integer;
+    }
 
     /**
      * ALU functionality
@@ -53,10 +65,35 @@ class CPU {
      * op can be: ADD SUB MUL DIV INC DEC CMP
      */
     alu(op, regA, regB) {
+      num1 = parseInt(this.ram.read(regA), 10);
+      num2 = parseInt(this.ram.read(regB), 10);
+
         switch (op) {
+            case 'ADD':
+              poke(regA, parseInt(num1 + num2, 2));
+              break;
+            case 'SUB':
+              poke(regA, parseInt(num1 - num2, 2));
+              break;
             case 'MUL':
-                // !!! IMPLEMENT ME
-                break;
+              poke(regA, parseInt(num1 * num2, 2));
+              break;
+            case 'DIV':
+              poke(regA, parseInt(num1 / num2, 2));
+              break;
+            case 'INC':
+              poke(regA, parseInt(num1++, 2));
+              break;
+            case 'DEC':
+              poke(regA, parseInt(num1--, 2));
+              break;
+            case 'CMP':
+              num1 > num2 ? this.flag = parseInt(2, 2)
+              : num1 < num2 ? this.flag = parseInt(4, 2)
+              : this.flag = parseInt(1, 2);
+              break;
+            default:
+              this.hlt();
         }
     }
 
@@ -64,32 +101,82 @@ class CPU {
      * Advances the CPU one cycle
      */
     tick() {
+        
+        const ADD = '10101000';
+        const AND = '10110011';
+        const CALL = '01001000';
+        const CMP = '10100000';
+        const DEC = '01111001';
+        const HLT = '00000001';
+        const INC = '01111000';
+        const INT = '01001010';
+        const IRET = '00001011';
+        const JEQ = '01010001';
+        const JGT = '01010100';
+        const JLT = '01010011';
+        const JMP = '01010000';
+        const JNE = '01010010';
+        const LD = '10011000';
+        const LDI = '10011001';
+        const MOD = '10101100';
+        const MUL = '10101010';
+        const NOP = '00000000';
+        const NOT = '01110000';
+        const OR = '10110001';
+        const POP = '01001100';
+        const PRA = '01000010';
+        const PRN = '01000011';
+        const PUSH = '01001101';
+        const RET = '00001001';
+        const ST = '10011010';
+        const SUB = '10101001';
+        const XOR = '10110010'; 
+
         // Load the instruction register (IR--can just be a local variable here)
         // from the memory address pointed to by the PC. (I.e. the PC holds the
         // index into memory of the instruction that's about to be executed
         // right now.)
 
-        // !!! IMPLEMENT ME
+        let IR = this.ram.read(this.PC);
 
         // Debugging output
-        //console.log(`${this.PC}: ${IR.toString(2)}`);
+        console.log(`${this.PC}: ${IR.toString(2)}`);
 
         // Get the two bytes in memory _after_ the PC in case the instruction
         // needs them.
 
-        // !!! IMPLEMENT ME
+        let operandA = this.ram.read(this.PC + 1);
+        let operandB = this.ram.read(this.PC + 2);
 
         // Execute the instruction. Perform the actions for the instruction as
         // outlined in the LS-8 spec.
-
-        // !!! IMPLEMENT ME
+        
+        switch (IR) {
+          case LDI:
+            this.ldi(operandA, operandB);
+            break;
+          case PRN:
+            this.prn(operandA);
+            break;
+          case HLT:
+            this.hlt();
+            break;
+          case ADD:
+            this.alu("ADD", operandA, operandB);
+            break;
+          case MUL:
+            this.alu("MUL", operandA, operandB);
+            break;
+          default:
+            this.hlt();
+        }
 
         // Increment the PC register to go to the next instruction. Instructions
         // can be 1, 2, or 3 bytes long. Hint: the high 2 bits of the
         // instruction byte tells you how many bytes follow the instruction byte
         // for any particular instruction.
         
-        // !!! IMPLEMENT ME
+        this.PC += (IR >> 6) + 1;
     }
 }
 
