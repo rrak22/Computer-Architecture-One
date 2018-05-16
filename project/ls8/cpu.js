@@ -35,7 +35,6 @@ const RET = 0b00001001;
 const ST = 0b10011010;
 const SUB = 0b10101001;
 const XOR = 0b10110010; 
-const MULT2PRINT = 0b00011000;
 
 class CPU {
 
@@ -136,6 +135,10 @@ class CPU {
 
         let IR = this.ram.read(this.PC);
         
+        if (IR !== CALL) {
+          this.PC += (IR >> 6) + 1;
+        }
+
         // Debugging output
         // console.log(`${this.PC}: ${IR.toString(2)}`);
 
@@ -152,7 +155,6 @@ class CPU {
         switch (IR) {
           case LDI:
             this.reg[operandA] = operandB;
-            // console.log(this.reg[operandA]);
             break;
           case PRN:
             console.log(this.reg[operandA]);
@@ -170,7 +172,7 @@ class CPU {
             nextAddress = this.PC + (IR >> 6) + 1;
             this.SP--;
             this.poke(this.SP, nextAddress);
-            // this.PC
+            this.PC = this.reg[operandA];
             break;
           case POP:
             this.reg[operandA] = this.ram.read(this.SP);
@@ -184,9 +186,6 @@ class CPU {
             this.PC = this.ram.read(this.SP);
             this.SP++;
             break;
-          case MULT2PRINT:
-            let result = this.alu("MUL", operandA, 2);
-            console.log(result);
           default:
             this.stopClock();
         }
@@ -196,7 +195,6 @@ class CPU {
         // instruction byte tells you how many bytes follow the instruction byte
         // for any particular instruction.
         
-        this.PC += (IR >> 6) + 1;
     }
 }
 
