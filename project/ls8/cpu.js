@@ -5,6 +5,38 @@
 /**
  * Class for simulating a simple Computer (CPU & memory)
  */
+
+const ADD = 0b10101000;
+const AND = 0b10110011;
+const CALL = 0b001001000;
+const CMP = 0b10100000;
+const DEC = 0b001111001;
+const HLT = 0b00000001;
+const INC = 0b001111000;
+const INT = 0b001001010;
+const IRET = 0b000001011;
+const JEQ = 0b001010001;
+const JGT = 0b001010100;
+const JLT = 0b001010011;
+const JMP = 0b001010000;
+const JNE = 0b001010010;
+const LD = 0b10011000;
+const LDI = 0b10011001;
+const MOD = 0b10101100;
+const MUL = 0b10101010;
+const NOP = 0b00000000;
+const NOT = 0b001110000;
+const OR = 0b10110001;
+const POP = 0b001001100;
+const PRA = 0b001000010; 
+const PRN = 0b01000011; 
+const PUSH = 0b001001101; 
+const RET = 0b00001001;
+const ST = 0b10011010;
+const SUB = 0b10101001;
+const XOR = 0b10110010; 
+
+
 class CPU {
 
     /**
@@ -92,36 +124,6 @@ class CPU {
      * Advances the CPU one cycle
      */
     tick() {
-        
-        const ADD = '10101000';
-        const AND = '10110011';
-        const CALL = '01001000'; //
-        const CMP = '10100000';
-        const DEC = '01111001'; //
-        const HLT = '00000001';
-        const INC = '01111000'; //
-        const INT = '01001010'; //
-        const IRET = '00001011'; //
-        const JEQ = '01010001'; //
-        const JGT = '01010100'; //
-        const JLT = '01010011'; //
-        const JMP = '01010000'; //
-        const JNE = '01010010'; //
-        const LD = '10011000';
-        const LDI = '10011001';
-        const MOD = '10101100';
-        const MUL = '10101010';
-        const NOP = '00000000';
-        const NOT = '01110000'; //
-        const OR = '10110001';
-        const POP = '01001100'; //
-        const PRA = '01000010'; //
-        const PRN = '1000011'; //
-        const PUSH = '01001101'; //
-        const RET = '00001001';
-        const ST = '10011010';
-        const SUB = '10101001';
-        const XOR = '10110010'; 
 
         // Load the instruction register (IR--can just be a local variable here)
         // from the memory address pointed to by the PC. (I.e. the PC holds the
@@ -129,9 +131,10 @@ class CPU {
         // right now.)
 
         let IR = this.ram.read(this.PC);
-
+        
         // Debugging output
         console.log(`${this.PC}: ${IR.toString(2)}`);
+
 
         // Get the two bytes in memory _after_ the PC in case the instruction
         // needs them.
@@ -141,7 +144,7 @@ class CPU {
 
         // Execute the instruction. Perform the actions for the instruction as
         // outlined in the LS-8 spec.
-        switch (IR.toString(2)) {
+        switch (IR) {
           case LDI:
             this.reg[operandA] = operandB;
             break;
