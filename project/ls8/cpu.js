@@ -35,7 +35,7 @@ const RET = 0b00001001;
 const ST = 0b10011010;
 const SUB = 0b10101001;
 const XOR = 0b10110010; 
-
+const MULT2PRINT = 0b00011000;
 
 class CPU {
 
@@ -46,12 +46,16 @@ class CPU {
         this.ram = ram;
 
         this.reg = new Array(8).fill(0); // General-purpose registers R0-R7
-        
+        this.reg[7] = 0xF4;
+
         // Special-purpose registers
         this.PC = 0; // Program Counter
         this.MAR = 0;
         this.MDR = 0;
         this.FL = 0;
+        this.IM = this.reg[5];
+        this.IS = this.reg[6];
+        this.SP = this.reg[7];
     }
     
     /**
@@ -124,7 +128,7 @@ class CPU {
      * Advances the CPU one cycle
      */
     tick() {
-
+        
         // Load the instruction register (IR--can just be a local variable here)
         // from the memory address pointed to by the PC. (I.e. the PC holds the
         // index into memory of the instruction that's about to be executed
@@ -133,7 +137,7 @@ class CPU {
         let IR = this.ram.read(this.PC);
         
         // Debugging output
-        console.log(`${this.PC}: ${IR.toString(2)}`);
+        // console.log(`${this.PC}: ${IR.toString(2)}`);
 
 
         // Get the two bytes in memory _after_ the PC in case the instruction
@@ -141,12 +145,14 @@ class CPU {
 
         let operandA = this.ram.read(this.PC + 1);
         let operandB = this.ram.read(this.PC + 2);
+        let nextAddress;
 
         // Execute the instruction. Perform the actions for the instruction as
         // outlined in the LS-8 spec.
         switch (IR) {
           case LDI:
             this.reg[operandA] = operandB;
+            // console.log(this.reg[operandA]);
             break;
           case PRN:
             console.log(this.reg[operandA]);
@@ -155,11 +161,32 @@ class CPU {
             this.stopClock();
             break;
           case ADD:
-            this.alu("ADD", this.reg[operandA], this.reg[operandB]);
+            this.alu("ADD", operandA, operandB);
             break;
           case MUL:
             this.alu("MUL", operandA, operandB);
             break;
+          case CALL:
+            nextAddress = this.PC + (IR >> 6) + 1;
+            this.SP--;
+            this.poke(this.SP, nextAddress);
+            // this.PC
+            break;
+          case POP:
+            this.reg[operandA] = this.ram.read(this.SP);
+            this.SP++;
+            break;
+          case PUSH:
+            this.SP--;
+            this.poke(this.SP, this.reg[operandA]);
+            break;
+          case RET:
+            this.PC = this.ram.read(this.SP);
+            this.SP++;
+            break;
+          case MULT2PRINT:
+            let result = this.alu("MUL", operandA, 2);
+            console.log(result);
           default:
             this.stopClock();
         }
