@@ -135,10 +135,6 @@ class CPU {
 
         let IR = this.ram.read(this.PC);
         
-        if (IR !== CALL) {
-          this.PC += (IR >> 6) + 1;
-        }
-
         // Debugging output
         // console.log(`${this.PC}: ${IR.toString(2)}`);
 
@@ -148,7 +144,6 @@ class CPU {
 
         let operandA = this.ram.read(this.PC + 1);
         let operandB = this.ram.read(this.PC + 2);
-        let nextAddress;
 
         // Execute the instruction. Perform the actions for the instruction as
         // outlined in the LS-8 spec.
@@ -169,9 +164,8 @@ class CPU {
             this.alu("MUL", operandA, operandB);
             break;
           case CALL:
-            nextAddress = this.PC + (IR >> 6) + 1;
             this.SP--;
-            this.poke(this.SP, nextAddress);
+            this.poke(this.SP, this.PC + 2);
             this.PC = this.reg[operandA];
             break;
           case POP:
@@ -194,7 +188,11 @@ class CPU {
         // can be 1, 2, or 3 bytes long. Hint: the high 2 bits of the
         // instruction byte tells you how many bytes follow the instruction byte
         // for any particular instruction.
-        
+
+        if (IR !== CALL) {
+          this.PC += (IR >> 6) + 1;
+        }
+
     }
 }
 
